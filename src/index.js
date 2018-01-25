@@ -9,3 +9,11 @@
 // TODO implement div function
 
 // TODO implement per function
+
+export {
+  add,
+  sub,
+  mul,
+  div,
+  per
+}
