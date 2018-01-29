@@ -1,150 +1,169 @@
 'use strict'
-
-import chai from 'chai'
+import jsc from 'jsverify'
 import { add, sub, mul, div, per } from './index.js'
 
-chai.should()
-
-const id = (value) => value
+const options = {
+  quiet: true
+}
 
 describe('add', () => {
-  it('Should return a number', () => {
-    add(1, 2).should.be.a('number')
-  })
-
   it('Should add any two numbers', () => {
-    for (let i = 0; i < 100; i++) {
-      let a = Math.floor(Math.random() * 100)
-      let b = Math.floor(Math.random() * 100)
-      add(a, b).should.equal(a + b)
-    }
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      return add(a, b) === a + b
+    }), options)
   })
 
   it('Should be referentially transparent', () => {
-    add(5, 5).should.equal(10)
-    id(10).should.equal(add(5, 5))
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return add(a, b) * c === (a + b) * c
+    }), options)
+  })
+
+  it('Should be commutative', () => {
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      return add(a, b) === add(b, a)
+    }), options)
+  })
+
+  it('Should be associative', () => {
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return add(add(a, b), c) === add(a, add(b, c))
+    }), options)
+  })
+
+  it('Should be distributive', () => {
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return c * add(a, b) === (c * add(a, 0)) + (c * add(b, 0))
+    }), options)
+  })
+
+  it('Should have identity of 0', () => {
+    jsc.check(jsc.forall(jsc.integer, (a) => {
+      return add(a, 0) === a && add(0, a) === a
+    }), options)
   })
 
   it('Should not mutate parameters', () => {
-    let a = 5
-    let b = 10
-
-    add(a, b)
-
-    a.should.equal(5)
-    b.should.equal(10)
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      const oldA = a
+      const oldB = b
+      add(a, b)
+      return a === oldA && b === oldB
+    }), options)
   })
 })
 
 describe('sub', () => {
-  it('Should return a number', () => {
-    sub(1, 3).should.be.a('number')
-  })
-
   it('Should subtract any two numbers', () => {
-    for (let i = 0; i < 100; i++) {
-      let a = Math.floor(Math.random() * 100)
-      let b = Math.floor(Math.random() * 100)
-      sub(a, b).should.equal(a - b)
-    }
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      return sub(a, b) === a - b
+    }), options)
   })
 
   it('Should be referentially transparent', () => {
-    sub(50, 20).should.equal(30)
-    id(30).should.equal(sub(50, 20))
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return c * sub(a, b) === c * (a - b)
+    }), options)
   })
 
   it('Should not mutate parameters', () => {
-    let a = 5
-    let b = 10
-
-    sub(b, a)
-
-    a.should.equal(5)
-    b.should.equal(10)
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      const oldA = a
+      const oldB = b
+      sub(a, b)
+      return a === oldA && b === oldB
+    }), options)
   })
 })
 
 describe('mul', () => {
-  it('Should return a number', () => {
-    mul(1, 3).should.be.a('number')
-  })
-
   it('Should multiply any two numbers correctly', () => {
-    for (let i = 0; i < 100; i++) {
-      let a = Math.floor(Math.random() * 100)
-      let b = Math.floor(Math.random() * 100)
-      mul(a, b).should.equal(a * b)
-    }
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      return mul(a, b) === a * b
+    }), options)
   })
 
   it('Should be referentially transparent', () => {
-    mul(15, 2).should.equal(30)
-    id(30).should.equal(mul(2, 15))
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return mul(a, b) + c === (a * b) + c
+    }), options)
+  })
+
+  it('Should be commutative', () => {
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      return mul(a, b) === mul(b, a)
+    }), options)
+  })
+
+  it('Should be associative', () => {
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return mul(mul(a, b), c) === mul(a, mul(b, c))
+    }), options)
+  })
+
+  it('Should be distributive', () => {
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return mul(c, add(a, b)) === mul(c, add(a, 0)) + mul(c, add(b, 0))
+    }), options)
+  })
+
+  it('Should have identity of 1', () => {
+    jsc.check(jsc.forall(jsc.integer, (a) => {
+      return mul(a, 1) === a && mul(1, a) === a
+    }), options)
   })
 
   it('Should not mutate parameters', () => {
-    let a = 5
-    let b = 10
-
-    mul(b, a)
-
-    a.should.equal(5)
-    b.should.equal(10)
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      const oldA = a
+      const oldB = b
+      mul(a, b)
+      return a === oldA && b === oldB
+    }), options)
   })
 })
 
 describe('div', () => {
-  it('Should return a number', () => {
-    div(1, 3).should.be.a('number')
-  })
-
   it('Should divide any two numbers correctly', () => {
-    for (let i = 0; i < 100; i++) {
-      let a = Math.floor(Math.random() * 100)
-      let b = Math.floor(Math.random() * 100)
-      div(a, b).should.equal(a / b)
-    }
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      return mul(a, b) === a / b
+    }), options)
   })
 
   it('Should be referentially transparent', () => {
-    div(50, 2).should.equal(25)
-    id(25).should.equal(div(50, 2))
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, jsc.integer, (a, b, c) => {
+      return div(a, b) + c === (a / b) + c
+    }), options)
   })
 
   it('Should not mutate parameters', () => {
-    let a = 5
-    let b = 10
-
-    div(b, a)
-
-    a.should.equal(5)
-    b.should.equal(10)
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      const oldA = a
+      const oldB = b
+      div(a, b)
+      return a === oldA && b === oldB
+    }), options)
   })
 })
 
 describe('per', () => {
-  it('Should return a number', () => {
-    per(50).should.be.a('number')
-  })
-
   it('Should return the correct percent for any number', () => {
-    for (let i = 0; i < 100; i++) {
-      let a = Math.floor(Math.random() * 1000)
-      per(a).should.equal(a / 100)
-    }
+    jsc.check(jsc.forall(jsc.integer, (a) => {
+      return per(a) === a / 100
+    }), options)
   })
 
   it('Should be referentially transparent', () => {
-    per(50).should.equal(0.5)
-    id(0.5).should.equal(per(50))
+    jsc.check(jsc.forall(jsc.integer, jsc.integer, (a, b) => {
+      return a * per(b) === a * (b / 100)
+    }), options)
   })
 
   it('Should not mutate parameters', () => {
-    let a = 5
-
-    per(a)
-
-    a.should.equal(5)
+    jsc.check(jsc.forall(jsc.integer, (a) => {
+      const oldA = a
+      per(a)
+      return a === oldA
+    }), options)
   })
 })

@@ -10,10 +10,4 @@
 
 // TODO implement per function
 
-export {
-  add,
-  sub,
-  mul,
-  div,
-  per
-}
+// TODO export each of the functions above
